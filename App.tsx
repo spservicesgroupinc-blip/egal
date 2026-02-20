@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from './components/Sidebar';
 import DisclaimerModal from './components/DisclaimerModal';
+import LoginPage from './components/LoginPage';
+import { useAuth } from './hooks/useAuth';
 import { ViewMode, CaseFile, ChatMessage } from './types';
 import { Icons } from './constants';
 import { geminiService } from './services/geminiService';
@@ -139,9 +141,8 @@ const ResearchTool: React.FC = () => {
   return (
     <div className="p-8 max-w-4xl mx-auto h-full flex flex-col">
       <h2 className="text-3xl font-serif font-bold text-legal-900 mb-2">Deep Legal Research</h2>
-      <p className="text-gray-600 mb-8">
-        <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full font-bold mr-2">MULTI-MODEL</span>
-        Running parallel analysis with Gemini 3 Pro (Case Law) and Gemini 3 Flash (Statutes).
+      <p className="text-gray-500 mb-8 text-sm">
+        Parallel analysis across case law and statutes using multiple AI models.
       </p>
 
       <div className="relative mb-8">
@@ -168,9 +169,8 @@ const ResearchTool: React.FC = () => {
         {loading ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-400 animate-pulse">
             <Icons.Search />
-            <p className="mt-4 font-semibold">Deploying Multi-Agent Swarm...</p>
-            <p className="text-sm mt-1 text-gray-300">Gemini 3 Pro: Analyzing Case Law</p>
-            <p className="text-sm text-gray-300">Gemini 3 Flash: Checking Title 31</p>
+            <p className="mt-4 font-semibold">Searching legal databases...</p>
+            <p className="text-sm mt-1 text-gray-300">Analyzing case law and statutes</p>
           </div>
         ) : result ? (
           <div className="space-y-6">
@@ -179,8 +179,8 @@ const ResearchTool: React.FC = () => {
                     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                     .replace(/^# (.*)/gm, '<h1 class="text-2xl font-bold text-legal-900 mb-4 pb-2 border-b border-gray-200">$1</h1>')
                     .replace(/^## (.*)/gm, '<h2 class="text-xl font-bold text-legal-800 mb-3 mt-6">$1</h2>') 
-                    .replace(/Case Law Analysis/g, '🏛️ Case Law Analysis')
-                    .replace(/Statutory & Procedural Framework/g, '📜 Statutory & Procedural Framework')
+                    .replace(/Case Law Analysis/g, 'Case Law Analysis')
+                    .replace(/Statutory & Procedural Framework/g, 'Statutory & Procedural Framework')
                 }} />
              </div>
              
@@ -273,7 +273,7 @@ const MotionDrafter: React.FC<{ files: CaseFile[] }> = ({ files }) => {
             <button 
                 onClick={handleDraft}
                 disabled={loading}
-                className="w-full py-3 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded shadow-sm transition disabled:opacity-50"
+                className="w-full py-3 bg-legal-800 hover:bg-legal-700 text-white font-semibold rounded-lg transition disabled:opacity-50"
             >
                 {loading ? 'Drafting...' : 'Generate Motion'}
             </button>
@@ -382,7 +382,7 @@ const Assistant: React.FC<{ files: CaseFile[] }> = ({ files }) => {
                     <button 
                         onClick={handleSend}
                         disabled={thinking || !input.trim()}
-                        className="bg-yellow-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-yellow-700 disabled:opacity-50 transition-colors"
+                        className="bg-legal-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-legal-700 disabled:opacity-50 transition-colors"
                     >
                         Send
                     </button>
@@ -445,12 +445,12 @@ const App: React.FC = () => {
       <p className="text-gray-600 mb-10 text-lg">Your AI-powered Indiana Family Law Assistant.</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-         <div onClick={() => setView('assistant')} className="bg-gradient-to-br from-yellow-600 to-yellow-700 p-6 rounded-2xl shadow-lg text-white cursor-pointer transform hover:scale-[1.02] transition">
-            <div className="bg-white/20 w-10 h-10 rounded-lg flex items-center justify-center mb-4">
+         <div onClick={() => setView('assistant')} className="bg-legal-900 p-6 rounded-2xl shadow-sm text-white cursor-pointer hover:shadow-md transition">
+            <div className="bg-legal-700 w-10 h-10 rounded-lg flex items-center justify-center mb-4">
                 <Icons.Chat />
             </div>
             <h3 className="text-xl font-bold mb-2">AI Assistant</h3>
-            <p className="text-yellow-100 text-sm leading-relaxed">Chat with an expert about your case strategy and questions.</p>
+            <p className="text-legal-300 text-sm leading-relaxed">Chat with an expert about your case strategy and questions.</p>
          </div>
 
          <div onClick={() => setView('research')} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 cursor-pointer hover:border-legal-500 hover:shadow-md transition">
@@ -496,6 +496,23 @@ const App: React.FC = () => {
     </div>
   );
 
+  const { user, loading: authLoading, signOut } = useAuth();
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="auth-spinner mx-auto mb-4" style={{ borderColor: '#bcccdc', borderTopColor: '#102a43', width: 32, height: 32 }}></div>
+          <p className="text-gray-500 text-sm">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LoginPage />;
+  }
+
   return (
     <div className="flex bg-slate-50 min-h-screen font-sans">
       <DisclaimerModal />
@@ -505,6 +522,8 @@ const App: React.FC = () => {
         tokenUsage={totalTokens}
         onInstall={handleInstallClick}
         canInstall={!!deferredPrompt}
+        onSignOut={signOut}
+        userEmail={user.email}
       />
       
       <main className="flex-1 h-screen overflow-hidden relative">

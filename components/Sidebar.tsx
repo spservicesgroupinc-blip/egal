@@ -8,9 +8,11 @@ interface SidebarProps {
   tokenUsage: number;
   onInstall: () => void;
   canInstall: boolean;
+  onSignOut: () => void;
+  userEmail?: string;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, tokenUsage, onInstall, canInstall }) => {
+const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, tokenUsage, onInstall, canInstall, onSignOut, userEmail }) => {
   const navItems: { id: ViewMode; label: string; icon: React.FC }[] = [
     { id: 'dashboard', label: 'Dashboard', icon: IconSet.Gavel },
     { id: 'assistant', label: 'AI Assistant', icon: IconSet.Chat },
@@ -27,7 +29,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, tokenUsage
     <div className="w-20 lg:w-64 bg-legal-900 text-white flex flex-col justify-between h-screen sticky top-0">
       <div>
         <div className="p-6 flex items-center justify-center lg:justify-start gap-3 border-b border-legal-800">
-          <div className="bg-yellow-600 p-2 rounded-lg">
+          <div className="bg-legal-700 p-2 rounded-lg">
              <IconSet.Scale />
           </div>
           <span className="text-xl font-serif font-bold hidden lg:block tracking-wide">HoosierLaw</span>
@@ -40,7 +42,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, tokenUsage
               onClick={() => onViewChange(item.id)}
               className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 ${
                 currentView === item.id
-                  ? 'bg-yellow-600 text-white shadow-lg'
+                  ? 'bg-legal-700 text-white border-l-2 border-white'
                   : 'text-legal-300 hover:bg-legal-800 hover:text-white'
               }`}
             >
@@ -56,11 +58,11 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, tokenUsage
         <div className="bg-legal-800 rounded-lg p-3 hidden lg:block border border-legal-700">
             <div className="flex items-center justify-between mb-1">
                 <span className="text-xs font-semibold text-legal-300">Session Usage</span>
-                <span className="text-xs font-mono text-yellow-500">{formatTokens(tokenUsage)} toks</span>
+                <span className="text-xs font-mono text-legal-200">{formatTokens(tokenUsage)} toks</span>
             </div>
             <div className="h-1.5 bg-legal-900 rounded-full w-full overflow-hidden">
                 <div 
-                    className="h-full bg-yellow-600 transition-all duration-500" 
+                    className="h-full bg-legal-500 transition-all duration-500" 
                     style={{ width: `${Math.min((tokenUsage / 100000) * 100, 100)}%` }}
                 ></div>
             </div>
@@ -69,15 +71,28 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, tokenUsage
         {canInstall && (
             <button 
                 onClick={onInstall}
-                className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-yellow-500 hover:bg-legal-800 transition-all duration-200 border border-yellow-600/30"
+                className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-legal-300 hover:bg-legal-800 transition-all duration-200 border border-legal-700"
             >
                 <IconSet.Download />
-                <span className="hidden lg:block font-bold">Install App</span>
+                <span className="hidden lg:block font-medium">Install App</span>
             </button>
         )}
 
-        <div className="mt-4 text-center lg:text-left">
-           <p className="text-[10px] text-legal-500">v1.2.0 • Desktop PWA</p>
+        {/* User info & sign out */}
+        <div className="mt-3 pt-3 border-t border-legal-800">
+          {userEmail && (
+            <p className="text-[11px] text-legal-400 truncate hidden lg:block mb-2" title={userEmail}>{userEmail}</p>
+          )}
+          <button
+            onClick={onSignOut}
+            className="w-full flex items-center gap-4 px-4 py-2 rounded-lg text-legal-400 hover:text-white hover:bg-legal-800 transition-all duration-200 text-sm"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+            </svg>
+            <span className="hidden lg:block">Sign out</span>
+          </button>
+          <p className="text-[10px] text-legal-600 mt-2 text-center lg:text-left">v1.2.0</p>
         </div>
       </div>
     </div>

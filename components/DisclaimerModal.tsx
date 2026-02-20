@@ -7,7 +7,7 @@ const DisclaimerModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm px-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-8 border-t-4 border-yellow-600">
+      <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-8 border-t-4 border-legal-800">
         <h2 className="text-2xl font-serif font-bold text-legal-900 mb-4">Legal Disclaimer</h2>
         <div className="prose prose-sm text-gray-600 mb-6 max-h-60 overflow-y-auto pr-2">
           <p className="mb-2"><strong>HoosierLaw AI is NOT a lawyer.</strong></p>
